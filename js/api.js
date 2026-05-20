@@ -8,6 +8,11 @@ const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     }).then(res => res.json()),
+    updateProject: (id, data) => fetch(`${API_URL}/projects/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(res => res.json()),
     deleteProject: (id) => fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' }).then(res => res.json()),
 
     // Activities

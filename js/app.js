@@ -133,7 +133,7 @@ async function loadProjects() {
                     <i class="ph-duotone ph-folder-dashed empty-state-icon"></i>
                     <h3>Aún no tienes proyectos</h3>
                     <p>Crea tu primer proyecto para empezar a modelar redes y analizar algoritmos.</p>
-                    <button class="btn primary mt-2" onclick="showModal('modal-project')">
+                    <button class="btn primary mt-2" onclick="resetProjectModal()">
                         <i class="ph ph-plus-circle"></i> Crear Proyecto
                     </button>
                 </div>
@@ -149,9 +149,14 @@ async function loadProjects() {
                             <i class="ph-duotone ph-folder text-primary"></i>
                             <h3>${p.name}</h3>
                         </div>
-                        <button class="btn danger small" onclick="deleteProject(${p.id}, event)" title="Eliminar">
-                            <i class="ph ph-trash"></i>
-                        </button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn secondary small" onclick="editProject(${p.id}, '${p.name.replace(/'/g, "\\'")}', '${(p.description || '').replace(/'/g, "\\'")}', event)" title="Editar">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                            <button class="btn danger small" onclick="deleteProject(${p.id}, event)" title="Eliminar">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <p class="text-muted" style="margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.description || 'Sin descripción'}</p>
                     <div>
@@ -168,14 +173,38 @@ async function loadProjects() {
     }
 }
 
+let editingProjectId = null;
+
+window.resetProjectModal = function() {
+    editingProjectId = null;
+    document.getElementById('proj-name').value = '';
+    document.getElementById('proj-desc').value = '';
+    document.querySelector('#modal-project h3').textContent = 'Crear Nuevo Proyecto';
+    showModal('modal-project');
+}
+
+window.editProject = function(id, name, desc, event) {
+    event.stopPropagation();
+    editingProjectId = id;
+    document.getElementById('proj-name').value = name;
+    document.getElementById('proj-desc').value = desc;
+    document.querySelector('#modal-project h3').textContent = 'Editar Proyecto';
+    showModal('modal-project');
+}
+
 async function submitProject() {
     const name = document.getElementById('proj-name').value;
     const desc = document.getElementById('proj-desc').value;
     if(!name) return showToast('Nombre requerido', 'error');
     
     try {
-        await api.createProject({name, description: desc});
-        showToast('Proyecto guardado correctamente.', 'success');
+        if (editingProjectId) {
+            await api.updateProject(editingProjectId, {name, description: desc});
+            showToast('Proyecto actualizado correctamente.', 'success');
+        } else {
+            await api.createProject({name, description: desc});
+            showToast('Proyecto guardado correctamente.', 'success');
+        }
         closeModal('modal-project');
         loadProjects();
     } catch (e) {
