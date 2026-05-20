@@ -132,7 +132,10 @@ function updateAlgoOptions() {
     spec.innerHTML = algoOptions[cat].map(o => `<option value="${o.value}">${o.label}</option>`).join('');
     
     document.getElementById('algo-source-group').style.display = (cat === 'shortest' || cat === 'flow') ? 'block' : 'none';
-    document.getElementById('algo-target-group').style.display = (cat === 'shortest' && spec.value === 'a*' || cat === 'flow') ? 'block' : 'none';
+    
+    // Mostrar Destino para todos los algoritmos de ruta más corta (excepto Floyd-Warshall que es todos contra todos, si quieres, o para todos)
+    // Para simplificar, Floyd-Warshall no lo usa en el backend de todos modos, pero Dijkstra y Bellman-Ford sí necesitan destino en nuestra UI actual.
+    document.getElementById('algo-target-group').style.display = ((cat === 'shortest' && spec.value !== 'floyd-warshall') || cat === 'flow') ? 'block' : 'none';
     
     updateAlgoDescription();
 }
@@ -144,7 +147,7 @@ document.addEventListener('change', function(e) {
     } else if(e.target && e.target.id == 'algo-specific') {
         const cat = document.getElementById('algo-category').value;
         const spec = document.getElementById('algo-specific');
-        document.getElementById('algo-target-group').style.display = (cat === 'shortest' && spec.value === 'a*' || cat === 'flow') ? 'block' : 'none';
+        document.getElementById('algo-target-group').style.display = ((cat === 'shortest' && spec.value !== 'floyd-warshall') || cat === 'flow') ? 'block' : 'none';
         updateAlgoDescription();
     }
 });
