@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus - Sistema de Gestión</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- tsParticles -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-basic@2/tsparticles.basic.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-interaction-particles-links@2/tsparticles.interaction.particles.links.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-move-base@2/tsparticles.move.base.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-shape-circle@2/tsparticles.shape.circle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-updater-color@2/tsparticles.updater.color.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-updater-opacity@2/tsparticles.updater.opacity.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-updater-size@2/tsparticles.updater.size.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
+    <!-- Vis.js for Graph -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <!-- Frappe Gantt -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+
+    <!-- SheetJS for Excel Import -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Intro.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css?v=14">
+</head>
+<body>
+    <!-- Background Particles Container -->
+    <div id="tsparticles"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="ph-fill ph-graph"></i>
+                <h1>Nexus</h1>
+            </div>
+            <nav style="display: flex; gap: 0.5rem;">
+                <button class="btn secondary" id="btn-theme-toggle" onclick="toggleTheme()" title="Cambiar Tema">
+                    <i class="ph ph-sun"></i>
+                </button>
+                <button class="btn secondary" id="btn-projects">
+                    <i class="ph ph-folder-open"></i> Mis Proyectos
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Projects View -->
+        <section id="view-projects" class="view active">
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <h2>Bienvenido a tu <span>Workspace</span></h2>
+                    <p>Gestiona, analiza y optimiza tus proyectos mediante modelos de redes avanzados y algoritmos de investigación de operaciones.</p>
+                    <button class="btn primary hero-btn" onclick="showModal('modal-project')" data-title="Crear Proyecto" data-intro="Empieza por aquí. Crea un nuevo proyecto para comenzar a gestionar tus actividades y dependencias." data-step="1">
+                        <i class="ph ph-plus-circle"></i> Crear Nuevo Proyecto
+                    </button>
+                </div>
+                <div class="hero-illustration">
+                    <i class="ph-duotone ph-graph"></i>
+                </div>
+            </div>
+            <div class="projects-grid" id="projects-list" data-title="Tus Proyectos" data-intro="Aquí aparecerán todos los proyectos que hayas creado. Haz clic en 'Abrir Proyecto' para entrar al detalle." data-step="2">
+                <!-- Projects will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Project Detail View -->
+        <section id="view-project-detail" class="view">
+            <div class="view-header project-header">
+                <div>
+                    <div class="badge">Proyecto Activo</div>
+                    <h2 id="current-project-name">Detalle del Proyecto</h2>
+                </div>
+                <button class="btn secondary" onclick="switchView('view-projects')">
+                    <i class="ph ph-arrow-left"></i> Volver al Panel
+                </button>
+            </div>
+
+            <div class="dashboard-tabs" data-title="Vistas del Proyecto" data-intro="Alterna entre las Actividades, el Grafo visual y la Línea de Tiempo (Gantt)." data-step="3">
+                <button class="tab-btn active" onclick="switchTab('tab-activities')">
+                    <i class="ph ph-list-numbers"></i> Actividades & Dependencias
+                </button>
+                <button class="tab-btn" onclick="switchTab('tab-graph')">
+                    <i class="ph ph-graph"></i> Grafo & Algoritmos
+                </button>
+                <button class="tab-btn" onclick="switchTab('tab-gantt')">
+                    <i class="ph ph-calendar-blank"></i> Línea de Tiempo (Gantt)
+                </button>
+            </div>
+
+            <div class="tab-content">
+                <!-- Activities & Dependencies Tab -->
+                <div id="tab-activities" class="tab-pane active">
+                    <div class="grid-2-cols">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="ph ph-check-square-offset"></i>
+                                    <h3>Actividades</h3>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn small primary" onclick="resetActivityModal()" data-title="Nueva Actividad" data-intro="Crea aquí todas las actividades de tu proyecto (nodos del grafo)." data-step="4">
+                                        <i class="ph ph-plus"></i> Nueva
+                                    </button>
+                                </div>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Duración</th>
+                                        <th>Costo</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activities-table-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="ph ph-arrows-left-right"></i>
+                                    <h3>Dependencias</h3>
+                                </div>
+                                <button class="btn small primary" onclick="resetDependencyModal()" data-title="Dependencias" data-intro="Una vez tengas actividades, conéctalas aquí creando dependencias (las aristas del grafo)." data-step="5">
+                                    <i class="ph ph-plus"></i> Nueva
+                                </button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>De</th>
+                                        <th>A</th>
+                                        <th>Costo/Dist.</th>
+                                        <th>Tiempo</th>
+                                        <th>Capacidad</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dependencies-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graph Tab -->
+                <div id="tab-graph" class="tab-pane">
+                    <div class="graph-layout">
+                        <div class="graph-sidebar">
+                            <div class="card-title" style="margin-bottom: 1.5rem;">
+                                <i class="ph ph-cpu"></i>
+                                <h3>Ejecutar Algoritmos</h3>
+                            </div>
+                            <div class="form-group">
+                                <label>Categoría</label>
+                                <select id="algo-category" onchange="updateAlgoOptions()">
+                                    <option value="mst">Árbol de Expansión Mínima</option>
+                                    <option value="shortest">Rutas Más Cortas</option>
+                                    <option value="flow">Flujo Máximo</option>
+                                    <option value="pm">Gestión de Proyectos (CPM/PERT)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="algo-specific-group">
+                                <label>Algoritmo</label>
+                                <select id="algo-specific"></select>
+                            </div>
+                            
+                            <div class="form-group" id="algo-source-group" style="display:none;">
+                                <label>Nodo Origen</label>
+                                <select id="algo-source"></select>
+                            </div>
+                            <div class="form-group" id="algo-target-group" style="display:none;">
+                                <label>Nodo Destino</label>
+                                <select id="algo-target"></select>
+                            </div>
+
+                            <button class="btn primary w-100 btn-run" onclick="runAlgorithm()" data-title="Algoritmos" data-intro="En la pestaña de Grafo, selecciona el algoritmo que desees (como Rutas Más Cortas) y haz clic en Procesar." data-step="6">
+                                <i class="ph ph-play"></i> Procesar
+                            </button>
+
+                            <div class="results-panel" id="algo-results">
+                                <!-- Results will appear here -->
+                            </div>
+                        </div>
+                        <div class="graph-container">
+                            <div id="network-graph"></div>
+                            <div class="graph-controls">
+                                <button class="btn secondary small" onclick="network.moveTo({ scale: network.getScale() + 0.2 })" title="Acercar">
+                                    <i class="ph ph-magnifying-glass-plus"></i>
+                                </button>
+                                <button class="btn secondary small" onclick="network.moveTo({ scale: network.getScale() - 0.2 })" title="Alejar">
+                                    <i class="ph ph-magnifying-glass-minus"></i>
+                                </button>
+                                <button class="btn secondary small" onclick="exportGraph()" title="Descargar PNG">
+                                    <i class="ph ph-image"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gantt Tab -->
+                <div id="tab-gantt" class="tab-pane">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="ph ph-calendar-check"></i>
+                                <h3>Línea de Tiempo del Proyecto (CPM)</h3>
+                            </div>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <input type="date" id="gantt-start-date" title="Fecha de Inicio" onchange="renderGantt()" style="padding: 0.4rem 0.8rem;">
+                                </div>
+                                <button class="btn small primary" onclick="startGanttSimulation()" data-title="Simulación Gantt" data-intro="Finalmente, ve a la pestaña Gantt y haz clic aquí para iniciar una simulación en tiempo real del progreso." data-step="7">
+                                    <i class="ph ph-play"></i> Iniciar simulación
+                                </button>
+                                <button class="btn small secondary" onclick="renderGantt()">
+                                    <i class="ph ph-arrows-clockwise"></i> Actualizar
+                                </button>
+                            </div>
+                        </div>
+                        <div style="position: relative;">
+                            <div id="gantt-chart"></div>
+                            <!-- Simulation Control Panel -->
+                            <div id="simulation-controls" class="simulation-controls">
+                                <div class="sim-header">
+                                    <h4>Simulación de Proyecto</h4>
+                                    <span class="badge" id="sim-status">En Curso</span>
+                                </div>
+                                <div class="sim-metrics">
+                                    <div class="metric">
+                                        <i class="ph ph-calendar"></i>
+                                        <span>Fecha: <strong id="sim-date">---</strong></span>
+                                    </div>
+                                    <div class="metric">
+                                        <i class="ph ph-activity"></i>
+                                        <span>Actividades Activas: <strong id="sim-active-tasks">0</strong></span>
+                                    </div>
+                                    <div class="metric">
+                                        <i class="ph ph-currency-dollar"></i>
+                                        <span>Costo Estimado: $<strong id="sim-cost">0</strong></span>
+                                    </div>
+                                </div>
+                                <div class="sim-actions">
+                                    <button class="btn primary small" id="btn-sim-pause" onclick="toggleSimulationPause()">
+                                        <i class="ph ph-pause"></i> Pausar
+                                    </button>
+                                    <button class="btn danger small" onclick="stopSimulation()">
+                                        <i class="ph ph-stop"></i> Detener
+                                    </button>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <select id="sim-speed" onchange="changeSimulationSpeed()" style="padding: 0.4rem; font-size: 0.8rem; background-color: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
+                                            <option value="800">Velocidad: Lenta</option>
+                                            <option value="400" selected>Velocidad: Normal</option>
+                                            <option value="100">Velocidad: Rápida</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modal-project">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="ph-duotone ph-folder-plus text-primary"></i>
+                    <h3>Crear Nuevo Proyecto</h3>
+                </div>
+                <span class="close" onclick="closeModal('modal-project')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Define los datos principales de tu red de proyecto para comenzar a trabajar.</p>
+                
+                <div class="form-group mt-2">
+                    <label>Nombre del Proyecto <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <i class="ph ph-text-t"></i>
+                        <input type="text" id="proj-name" placeholder="Ej. Construcción de Planta" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <div class="input-with-icon align-top">
+                        <i class="ph ph-text-align-left"></i>
+                        <textarea id="proj-desc" placeholder="Detalles, objetivos o notas adicionales sobre el proyecto..."></textarea>
+                    </div>
+                    <p class="helper-text">Opcional. Te ayudará a identificar el propósito del modelo.</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn secondary w-100" onclick="closeModal('modal-project')">Cancelar</button>
+                    <button class="btn primary w-100" onclick="submitProject()">
+                        <i class="ph ph-floppy-disk"></i> Guardar Proyecto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-activity">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Actividad</h3>
+                <span class="close" onclick="closeModal('modal-activity')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="act-id">
+                <div class="form-group">
+                    <label>Nombre de la Actividad</label>
+                    <input type="text" id="act-name" placeholder="Ej. Diseño de Interfaz">
+                </div>
+                <div class="form-group">
+                    <label>Duración</label>
+                    <input type="number" id="act-duration" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Costo</label>
+                    <input type="number" id="act-cost" value="0">
+                </div>
+                <button class="btn primary" onclick="submitActivity()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-dependency">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Dependencia</h3>
+                <span class="close" onclick="closeModal('modal-dependency')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="dep-id">
+                <div class="form-group">
+                    <label>Desde (Origen)</label>
+                    <select id="dep-from"></select>
+                </div>
+                <div class="form-group">
+                    <label>Hasta (Nodo Destino)</label>
+                    <select id="dep-to"></select>
+                </div>
+                <div class="form-group">
+                    <label>Peso (Costo/Distancia)</label>
+                    <input type="number" id="dep-weight" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Tiempo</label>
+                    <input type="number" id="dep-time" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Capacidad</label>
+                    <input type="number" id="dep-capacity" value="1">
+                </div>
+                <button class="btn primary" onclick="submitDependency()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Steps Modal -->
+    <div class="modal-overlay" id="modal-steps">
+        <div class="modal" style="max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="ph-duotone ph-book-open-text text-primary" style="font-size: 1.5rem;"></i>
+                    <h3 style="margin: 0;">Explicación Paso a Paso</h3>
+                </div>
+                <span class="close" onclick="closeModal('modal-steps')">&times;</span>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1; padding-right: 1rem;" id="steps-container">
+                <!-- Pasos inyectados por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- API Logic -->
+    <script src="js/api.js?v=15"></script>
+    <!-- WebSockets Logic -->
+    <script src="js/ws.js?v=15"></script>
+    <!-- App Logic -->
+    <script src="js/app.js?v=15"></script>
+    <script src="js/graph.js?v=15"></script>
+</body>
+</html>
