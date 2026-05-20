@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setTimeout(() => {
         if (!localStorage.getItem('tour_completed')) {
-            startGlobalTour();
+            // startGlobalTour(); // Comentado para deshabilitar el recorrido sin borrar el código
             localStorage.setItem('tour_completed', 'true');
         }
     }, 1500);
