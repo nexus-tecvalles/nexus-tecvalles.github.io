@@ -1,4 +1,4 @@
-const API_URL = `http://${window.location.hostname}:8000`;
+const API_URL = `https://nexus-backend-n0pq.onrender.com/`;
 
 const api = {
     // Projects
