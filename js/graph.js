@@ -101,18 +101,53 @@ const algoOptions = {
     ]
 };
 
+const algoDescriptions = {
+    'prim': 'Conecta todos los nodos de la red al menor costo posible. Empieza desde un nodo y siempre busca la conexión más barata disponible.',
+    'kruskal': 'También conecta toda la red al menor costo, pero lo hace ordenando primero todas las conexiones (de la más barata a la más cara) y uniéndolas sin formar ciclos.',
+    'dijkstra': 'Encuentra la ruta más corta (o de menor costo) desde el Nodo Origen hacia el Nodo Destino. Solo funciona si todos los costos son positivos.',
+    'bellman-ford': 'Busca la ruta más corta permitiendo costos negativos. Es un poco más lento que Dijkstra, pero más seguro en redes complejas.',
+    'floyd-warshall': 'Calcula la distancia mínima entre TODOS los pares de nodos al mismo tiempo. Genera una tabla con todos los resultados. Ideal para redes pequeñas.',
+    'a*': 'Es una versión inteligente de Dijkstra. Usa una "intuición" o heurística para buscar en la dirección correcta hacia el destino y encontrar la ruta más rápido.',
+    'ford-fulkerson': 'Calcula la cantidad máxima de "flujo" (como agua, tráfico o datos) que puede viajar desde el Origen hasta el Destino respetando las capacidades máximas de cada arista.',
+    'cpm': 'Calcula el tiempo mínimo necesario para terminar todo el proyecto. Identifica la <strong>Ruta Crítica</strong> (las actividades que si se retrasan, retrasan todo el proyecto).',
+    'pert': 'Parecido al CPM, pero se utiliza cuando el tiempo de las actividades es incierto (usa tiempos optimistas, probables y pesimistas).'
+};
+
+function updateAlgoDescription() {
+    const spec = document.getElementById('algo-specific').value;
+    const descDiv = document.getElementById('algo-description');
+    if (spec && algoDescriptions[spec]) {
+        descDiv.style.display = 'block';
+        descDiv.innerHTML = `<strong>¿Qué hace este algoritmo?</strong><br> ${algoDescriptions[spec]}`;
+    } else {
+        descDiv.style.display = 'none';
+    }
+}
+
 function updateAlgoOptions() {
     const cat = document.getElementById('algo-category').value;
     const spec = document.getElementById('algo-specific');
+    
+    // Al cambiar la categoría, si estábamos mostrando un tooltip o descripción, lo reseteamos implícitamente
     spec.innerHTML = algoOptions[cat].map(o => `<option value="${o.value}">${o.label}</option>`).join('');
     
     document.getElementById('algo-source-group').style.display = (cat === 'shortest' || cat === 'flow') ? 'block' : 'none';
     document.getElementById('algo-target-group').style.display = (cat === 'shortest' && spec.value === 'a*' || cat === 'flow') ? 'block' : 'none';
     
-    spec.onchange = () => {
-        document.getElementById('algo-target-group').style.display = (cat === 'shortest' && spec.value === 'a*' || cat === 'flow') ? 'block' : 'none';
-    };
+    updateAlgoDescription();
 }
+
+// Override function to handle onchange from select elements in HTML
+document.addEventListener('change', function(e) {
+    if(e.target && e.target.id == 'algo-category') {
+        updateAlgoOptions();
+    } else if(e.target && e.target.id == 'algo-specific') {
+        const cat = document.getElementById('algo-category').value;
+        const spec = document.getElementById('algo-specific');
+        document.getElementById('algo-target-group').style.display = (cat === 'shortest' && spec.value === 'a*' || cat === 'flow') ? 'block' : 'none';
+        updateAlgoDescription();
+    }
+});
 
 // Initial setup
 document.addEventListener('DOMContentLoaded', updateAlgoOptions);
