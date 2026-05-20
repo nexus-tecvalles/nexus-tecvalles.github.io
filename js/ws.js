@@ -15,7 +15,7 @@ function connectWebSocket(projectId) {
     }
 
     currentWsProjectId = projectId;
-    const wsUrl = `ws://${window.location.hostname}:8000/ws/${projectId}/${clientId}`;
+    const wsUrl = `wss://nexus-backend-n0pq.onrender.com/ws/${projectId}/${clientId}`;
     
     ws = new WebSocket(wsUrl);
 
