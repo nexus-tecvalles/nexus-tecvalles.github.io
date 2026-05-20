@@ -546,7 +546,11 @@ async function renderGantt() {
                 end: end.toISOString().split('T')[0],
                 progress: 0,
                 dependencies: deps,
-                custom_class: isCritical ? 'bar-critical' : ''
+                custom_class: isCritical ? 'bar-critical' : '',
+                // Extra data for tooltip
+                cost: a.cost,
+                duration: a.duration,
+                isCritical: isCritical
             };
         });
 
@@ -566,7 +570,21 @@ async function renderGantt() {
             padding: 18,
             view_mode: viewMode,
             date_format: 'YYYY-MM-DD',
-            language: 'es'
+            language: 'es',
+            custom_popup_html: function(task) {
+                const end_date = task._end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                const start_date = task._start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                const critStatus = task.isCritical ? '<strong style="color:#ef4444;">CRÍTICA</strong>' : 'Normal';
+                return `
+                    <div style="padding: 12px; border-radius: 8px; background: var(--card-bg, #1e293b); color: var(--text-color, #f8fafc); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); border: 1px solid var(--border, #3b82f6); min-width: 200px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">${task.name}</h4>
+                        <div style="font-size: 12px; margin-bottom: 4px;"><i class="ph ph-calendar"></i> ${start_date} - ${end_date}</div>
+                        <div style="font-size: 12px; margin-bottom: 4px;"><i class="ph ph-clock"></i> Duración: ${task.duration} días</div>
+                        <div style="font-size: 12px; margin-bottom: 4px;"><i class="ph ph-currency-dollar"></i> Costo: $${task.cost}</div>
+                        <div style="font-size: 12px; margin-top: 6px; padding-top: 4px; border-top: 1px dashed var(--border);">Estado: ${critStatus}</div>
+                    </div>
+                `;
+            }
         });
         
         // Inject some CSS to highlight critical path bars and make it look prettier
