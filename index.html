@@ -229,9 +229,16 @@
                                 <i class="ph ph-calendar-check"></i>
                                 <h3>Línea de Tiempo del Proyecto (CPM)</h3>
                             </div>
-                            <div style="display: flex; gap: 1rem; align-items: center;">
+                            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <input type="date" id="gantt-start-date" title="Fecha de Inicio" onchange="renderGantt()" style="padding: 0.4rem 0.8rem;">
+                                    <select id="gantt-view-mode" onchange="changeGanttViewMode()" title="Vista" style="padding: 0.4rem 0.8rem; border-radius: 8px;">
+                                        <option value="Day">Ver por Días</option>
+                                        <option value="Week" selected>Ver por Semanas</option>
+                                        <option value="Month">Ver por Meses</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <input type="date" id="gantt-start-date" title="Fecha de Inicio" onchange="renderGantt()" style="padding: 0.4rem 0.8rem; border-radius: 8px;">
                                 </div>
                                 <button class="btn small primary" onclick="startGanttSimulation()" data-title="Simulación Gantt" data-intro="Finalmente, ve a la pestaña Gantt y haz clic aquí para iniciar una simulación en tiempo real del progreso." data-step="7">
                                     <i class="ph ph-play"></i> Iniciar simulación
@@ -400,11 +407,11 @@
     </div>
 
     <!-- API Logic -->
-    <script src="js/api.js?v=17"></script>
+    <script src="js/api.js?v=18"></script>
     <!-- WebSockets Logic -->
-    <script src="js/ws.js?v=17"></script>
+    <script src="js/ws.js?v=18"></script>
     <!-- App Logic -->
-    <script src="js/app.js?v=17"></script>
-    <script src="js/graph.js?v=17"></script>
+    <script src="js/app.js?v=18"></script>
+    <script src="js/graph.js?v=18"></script>
 </body>
 </html>

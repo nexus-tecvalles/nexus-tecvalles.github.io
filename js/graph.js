@@ -553,22 +553,48 @@ async function renderGantt() {
         currentGanttTasks = tasks;
 
         document.getElementById('gantt-chart').innerHTML = '';
+        const viewMode = document.getElementById('gantt-view-mode') ? document.getElementById('gantt-view-mode').value : 'Week';
+
         gantt = new Gantt("#gantt-chart", currentGanttTasks, {
+            header_height: 50,
+            column_width: 30,
+            step: 24,
             view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-            view_mode: 'Day',
+            bar_height: 25,
+            bar_corner_radius: 6,
+            arrow_curve: 5,
+            padding: 18,
+            view_mode: viewMode,
+            date_format: 'YYYY-MM-DD',
             language: 'es'
         });
         
-        // Inject some CSS to highlight critical path bars
+        // Inject some CSS to highlight critical path bars and make it look prettier
         const style = document.createElement('style');
         style.innerHTML = `
-            .bar-critical .bar { fill: #ef4444 !important; }
+            .bar-critical .bar { fill: #ef4444 !important; stroke: #b91c1c !important; stroke-width: 1px !important; }
             .bar-critical .bar-progress { fill: #b91c1c !important; }
+            .gantt .bar-wrapper:hover .bar { fill: var(--primary-color); opacity: 0.8; }
+            .gantt .bar { fill: var(--primary-color); stroke: var(--primary-hover); stroke-width: 1px; transition: all 0.2s; }
+            .gantt .bar-progress { fill: var(--primary-hover); }
+            .gantt .bar-label { fill: #fff; font-weight: bold; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; }
+            .gantt .grid-header { fill: var(--card-bg); stroke: var(--border); }
+            .gantt .grid-row { fill: transparent; stroke: var(--border); }
+            .gantt .tick { stroke: var(--border); }
+            .gantt .lower-text, .gantt .upper-text { fill: var(--text-color); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; }
         `;
+        document.head.appendChild(style);
         document.head.appendChild(style);
 
     } catch (e) {
         document.getElementById('gantt-chart').innerHTML = 'Error al generar Gantt. ' + e.message;
+    }
+}
+
+function changeGanttViewMode() {
+    if (gantt) {
+        const mode = document.getElementById('gantt-view-mode').value;
+        gantt.change_view_mode(mode);
     }
 }
 
